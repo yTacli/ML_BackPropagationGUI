@@ -12,14 +12,27 @@ class Noron():
             self.output = sigmoid(self.value)
         elif self.activationFunction == 'Threshold':
             self.output = threshold(self.value,self.threshold)                    
-    
+
 # Threshold (unit-step)
+# Türevlenebilir olmadığı için error-coefficiation hatalı olacaktır.
 def threshold(x,t):
     if x >= t:
         return 1
-    else:
+    else:        
         return 0
         
 # Sigmoid Aktivasyon
 def sigmoid(x):
     return 1/(1+np.exp(-x))
+
+# Türevi Error-coefficiation'ı etkilediği için kullanılmadı
+def tanh(x):
+    # (e^x-e^-x)/(e^x+e^-x)
+    return np.tanh(x)
+    
+# Türevi Error-coefficiation'ı etkilediği için kullanılmadı
+def relu(x):
+    if x < 0:
+        return 0
+    elif x >= 0:
+        return x
