@@ -1,5 +1,6 @@
 # ML_BackPropagationGUI
-# Requirements
-# pip install PySimpleGUI
+## Requirements
+#### pip install PySimpleGUI
 
-# Run the BackPropagationGUI.py
+## Run
+#### BackPropagationGUI.py
