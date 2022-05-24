@@ -245,16 +245,16 @@ def hidden_detail_input(hiddenLayerNumber):
 def file_row_select(dataFrame,rowsNumber):
     selectRow = list(dataFrame.loc[rowsNumber])
     selectRowInput = [] 
-    for i in range(1,len(selectRow)):               
+    for i in range(1,len(selectRow)-1):               
         selectRowInput.append(int(selectRow[i])) # verilerde string varsa
 
     # 2 output için
-    if selectRow[len(selectRow)] == 0:
+    if selectRow[len(selectRow)-1] == 0:
         out2 = 1
     else:
         out2 = 0
     selectRowOutput = []
-    selectRowOutput.append(selectRow[len(selectRow)])
+    selectRowOutput.append(selectRow[len(selectRow)-1])
     selectRowOutput.append(out2)
     return selectRowInput,selectRowOutput
 
@@ -406,7 +406,7 @@ while 1:
                 for j in range(rowsNumber):
                     if tempdatas.iloc[j][fileInputNumber+1] == list(outstr)[i]:
                         tempdatas.at[j,sonsutun] = i
-            fileInput, outputTarget =  file_row_select(tempdatas,0)     # ilk sutun
+            fileInput, outputTarget =  file_row_select(tempdatas,i)     # ilk sutun
            
         main_window["-CREATEMODELVIEW-"].update(disabled = True) 
         main_window["-INITIALIZE-"].update(disabled = False)       
@@ -491,8 +491,8 @@ while 1:
                 fileInput, outputTarget =  file_row_select(tempdatas,rowsNumber)     # ilk sutun               
                 for i in range(len(fmodel[0].norons)):
                     fmodel[0].norons[i].value = fileInput[i]    # input
-                for j in range(len(fmodel[len(fmodel)])):
-                    fmodel[len(fmodel)].norons[j].value = outputTarget[j]  # output
+                for j in range(len(fmodel[len(fmodel)-1].norons)):
+                    fmodel[len(fmodel)-1].norons[j].value = outputTarget[j]  # output
 
                 for i in range (int(epoc)):        
                     bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate)  
