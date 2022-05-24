@@ -17,7 +17,8 @@ class Noron():
 
 # Threshold (unit-step)
 # Türevlenebilir olmadığı için error-coefficiation hatalı olacaktır.
-def threshold(x,t):
+# Unit-Step
+def threshold(x,t): 
     if x >= t:
         return 1
     else:        
@@ -27,14 +28,14 @@ def threshold(x,t):
 def sigmoid(x):
     return 1/(1+np.exp(-x))
 
-# Türevi Error-coefficiation'ı etkilediği için kullanılmadı
-def tanh(x):
-    # (e^x-e^-x)/(e^x+e^-x)
-    return np.tanh(x)
-    
-# Türevi Error-coefficiation'ı etkilediği için kullanılmadı
 def relu(x):
     if x < 0:
         return 0
     elif x >= 0:
         return x
+
+# Türevi Error-coefficiation'ı etkilediği için kullanılmadı
+def tanh(x):
+    # (e^x-e^-x)/(e^x+e^-x)
+    return np.tanh(x)
+    
