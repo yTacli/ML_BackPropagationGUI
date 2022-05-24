@@ -112,7 +112,7 @@ def create_main_window():
             sg.Push(),
             sg.Button("RESET", key="-RESET-")
         ],
-        [sg.StatusBar("Yücel TACLI")]
+        [sg.StatusBar("Yücel TACLI - https://github.com/yTacli/ML_BackPropagationGUI.git")]
     ]
     window = sg.Window("Back Propataion GUI", layout=main_layout, finalize=True)
     return window
