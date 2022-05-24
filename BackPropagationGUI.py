@@ -102,7 +102,7 @@ def create_main_window():
             sg.Text("Öğrenme Oranı : "),
             sg.Spin([x for x in np.arange(0.0, 1.01, 0.01)], initial_value=0.05,  key="-LEARNRATE-", size=(6,1)),            
             sg.Text("Aktivasyon Fonksiyonu : "),
-            sg.Combo(['Sigmoig','Threshold'],'Sigmoid',auto_size_text=True,key='-ACTIVATION-'),
+            sg.Combo(['Sigmoig','ReLU','Threshold'],'Sigmoid',auto_size_text=True,key='-ACTIVATION-'),
             sg.Text("Threshold : "),
             sg.Spin([x for x in np.arange(0.0, 1.01, 20.0)],initial_value=0.0,  key="-THRESHOLD-", size=(6,1))            
         ],

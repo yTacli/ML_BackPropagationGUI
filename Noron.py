@@ -10,6 +10,8 @@ class Noron():
         self.threshold = 0      
         if self.activationFunction == 'Sigmoid':
             self.output = sigmoid(self.value)
+        elif self.activationFunction == 'ReLU':
+            self.output = sigmoid(self.value)
         elif self.activationFunction == 'Threshold':
             self.output = threshold(self.value,self.threshold)                    
 

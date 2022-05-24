@@ -86,11 +86,21 @@ def forward(model,weight,bias):
             md[i].norons[j].value = sum + bias[i-1][j] 
     return md
 
-def error_coefficient_out(outputTarget,outputPredic):     
-    return ((outputTarget-outputPredic) * outputPredic * (1-outputPredic))
+def derivatives(activatitionFunction, x):
+    if activatitionFunction == "Sigmoid":
+        return x*(1-x)
+    if activatitionFunction == "ReLU":
+        if x >= 0:
+            return 1
+        else: 
+            return 0
+
+def error_coefficient_out(activatitionFunction,outputTarget,outputPredic):
+    derivative = derivatives(activatitionFunction,outputPredic)   
+    return (outputTarget-outputPredic) * derivative
 
 # Hata Katsayısı 
-def error_coefficient(models,weights,outputTarget):
+def error_coefficient(models,weights,outputTarget,activatitionFunction):
     # Out     
     for i in range(len(models[len(models)-1].norons)):
         models[len(models)-1].norons[i].errorCoefficient = error_coefficient_out(outputTarget[i],models[len(models)-1].norons[i].value)    
@@ -100,7 +110,8 @@ def error_coefficient(models,weights,outputTarget):
             sum_error_weight = 0
             for k in range(len(models[i+1].norons)):
                 sum_error_weight += models[i+1].norons[k].errorCoefficient * weights[i][j][k]
-            models[i].norons[j].errorCoefficient = sum_error_weight * models[i].norons[j].value * (1 - models[i].norons[j].value) 
+                derivative = derivatives(activatitionFunction,models[i].norons[j].value) 
+            models[i].norons[j].errorCoefficient = sum_error_weight * derivative
     return models
 
 # BACKWARD 
