@@ -456,7 +456,7 @@ while 1:
         main_window["-NEXT-"].update(disabled = True)              
         main_window["-BACK-"].update(disabled = False)        
     elif event == "-BACK-":    
-        bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate)
+        bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activatitionFunction)
         printVal = []
         for layer in range(len(weights)):
             for noron in range(len(weights[layer])):
@@ -495,12 +495,12 @@ while 1:
                     fmodel[len(fmodel)-1].norons[j].value = outputTarget[j]  # output
 
                 for i in range (int(epoc)):        
-                    bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate)  
+                    bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activatitionFunction)  
                     fmodel= md.forward(bmodel,upW,upB)
                 
         else:                                    
             for i in range (int(epoc)):        
-                bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate)  
+                bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activatitionFunction)  
                 fmodel= md.forward(bmodel,upW,upB)  
             
               

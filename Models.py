@@ -137,8 +137,8 @@ def update_weight_bias(models,weights,bias,learningRate):
         updateBias.append(nextNoron)   
     return updateWeights,updateBias
 
-def backward(models,weights,bias,outputTarget,learningRate):    
-    m = error_coefficient(models,weights,outputTarget)
+def backward(models,weights,bias,outputTarget,learningRate,activatitionFunction):    
+    m = error_coefficient(models,weights,outputTarget,activatitionFunction)
     upW,upB = update_weight_bias(m,weights,bias,learningRate)    
     return m,upW,upB
 
