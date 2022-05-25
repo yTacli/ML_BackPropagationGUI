@@ -86,31 +86,31 @@ def forward(model,weight,bias):
             md[i].norons[j].value = sum + bias[i-1][j] 
     return md
 
-def derivatives(activatitionFunction, x):
-    if activatitionFunction == "Sigmoid":
+def derivatives(activationFunction, x):
+    if activationFunction == "Sigmoid":
         return x*(1-x)
-    if activatitionFunction == "ReLU":
+    if activationFunction == "ReLU":
         if x >= 0:
             return 1
         else: 
             return 0
 
-def error_coefficient_out(activatitionFunction,outputTarget,outputPredic):
-    derivative = derivatives(activatitionFunction,outputPredic)   
+def error_coefficient_out(activationFunction,outputTarget,outputPredic):
+    derivative = derivatives(activationFunction,outputPredic)   
     return (outputTarget-outputPredic) * derivative
 
 # Hata Katsayısı 
-def error_coefficient(models,weights,outputTarget,activatitionFunction):
+def error_coefficient(models,weights,outputTarget,activationFunction):
     # Out     
     for i in range(len(models[len(models)-1].norons)):
-        models[len(models)-1].norons[i].errorCoefficient = error_coefficient_out(outputTarget[i],models[len(models)-1].norons[i].value)    
+        models[len(models)-1].norons[i].errorCoefficient = error_coefficient_out(activationFunction,outputTarget[i],models[len(models)-1].norons[i].value)    
     # Hidden
     for i in range(len(models)-2, 0, -1): # ilk katmana gerek yok
         for j in range(len(models[i].norons)):
             sum_error_weight = 0
             for k in range(len(models[i+1].norons)):
                 sum_error_weight += models[i+1].norons[k].errorCoefficient * weights[i][j][k]
-                derivative = derivatives(activatitionFunction,models[i].norons[j].value) 
+                derivative = derivatives(activationFunction,models[i].norons[j].value) 
             models[i].norons[j].errorCoefficient = sum_error_weight * derivative
     return models
 
@@ -123,7 +123,7 @@ def update_weight_bias(models,weights,bias,learningRate):
         for j in range(len(models[i].norons)):
             nextNoron = []            
             for k in range(len(models[i+1].norons)):
-                newWeight = weights[i][j][k] - learningRate * models[i+1].norons[k].errorCoefficient * models[i].norons[j].value               
+                newWeight = weights[i][j][k] + learningRate * models[i+1].norons[k].errorCoefficient * models[i].norons[j].value               
                 nextNoron.append(newWeight)                
             noronNumber.append(nextNoron)
         updateWeights.append(noronNumber)
@@ -132,7 +132,7 @@ def update_weight_bias(models,weights,bias,learningRate):
     for i in range(len(models)-1):
         nextNoron = []
         for j in range(len(models[i+1].norons)):
-            newBias = bias[i][j] - learningRate * models[i+1].norons[j].errorCoefficient
+            newBias = bias[i][j] + learningRate * models[i+1].norons[j].errorCoefficient
             nextNoron.append(newBias)
         updateBias.append(nextNoron)   
     return updateWeights,updateBias
