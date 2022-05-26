@@ -253,7 +253,7 @@ def file_row_select(dataFrame,rowsNumber,inputColumns,ouputColumn):
     selectRow = list(dataFrame.loc[rowsNumber])
     selectRowInput = [] 
     for col in inputColumns:
-        selectRowInput.append(int(selectRow[col])) # verilerde string varsa int()
+        selectRowInput.append(float(selectRow[col])) # verilerde string varsa float()
 
     # 2 output için
     if selectRow[ouputColumn] == 0:
