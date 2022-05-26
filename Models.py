@@ -167,4 +167,4 @@ def root_mean_square_error(models,outputTarget):
     error=0
     for i in range(len(outputTarget)):
         error += np.square(outputTarget[i]-outputPredic[i])
-    return sqrt(error/len(outputPredic))
+    return np.sqrt(error/len(outputPredic))
