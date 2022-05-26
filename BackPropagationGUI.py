@@ -149,7 +149,7 @@ def create_model_view(input,hidden,output):
         g.draw_point((biasDist, VIEWHEIGHT-20), 30, color="gray")        
         g.draw_text("b"+str(i+1), (biasDist,VIEWHEIGHT-20), color="black")         
         biasX.append(biasDist) 
-    biasDist = (hiddenX[len(hidden)-1]) + (((VIEWWEIGHT-50)-(hiddenX[len(hidden)-1]))/2)
+    biasDist = (hiddenX[-1]) + (((VIEWWEIGHT-50)-(hiddenX[-1]))/2)
     biasX.append(biasDist)
     g.draw_point((biasDist, VIEWHEIGHT-20), 30, color="gray")
     g.draw_text("b"+str(len(hidden)+1), (biasDist,VIEWHEIGHT-20), color="black")     
@@ -161,9 +161,9 @@ def create_model_view(input,hidden,output):
         for j in range(hidden[i-1]):
             for k in range(hidden[i]):
                 g.draw_line((hiddenX[i-1]+15,hiddenY[i-1][j]),(hiddenX[i]-15, hiddenY[i][k]),width=2)
-    for i in range(hidden[len(hidden)-1]):
+    for i in range(hidden[-1]):
         for j in range(output):
-            g.draw_line((hiddenX[len(hidden)-1]+15,hiddenY[len(hidden)-1][i]),(VIEWWEIGHT-65, outY[j]),width=2)  
+            g.draw_line((hiddenX[-1]+15,hiddenY[-1][i]),(VIEWWEIGHT-65, outY[j]),width=2)  
     #bias ağırlık çiz         
     for i in range(len(hidden)):
         for j in range(hidden[i]):
@@ -262,7 +262,7 @@ def file_row_select(dataFrame,rowsNumber,inputColumns,ouputColumn):
         out2 = 0
 
     selectRowOutput = []
-    selectRowOutput.append(selectRow[len(selectRow)-1])
+    selectRowOutput.append(selectRow[-1])
     selectRowOutput.append(out2)
 
     return selectRowInput,selectRowOutput
@@ -445,8 +445,8 @@ while 1:
         for layer in range(1,len(fmodel)):
             for noron in range(len(fmodel[layer].norons)):
                 printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(fmodel[layer].norons[noron].value))
-        for noron in range(len(fmodel[len(fmodel)-1].norons)):
-            printVal.append("o"+str(noron+1)+"= "+str(fmodel[len(fmodel)-1].norons[noron].value))
+        for noron in range(len(fmodel[-1].norons)):
+            printVal.append("o"+str(noron+1)+"= "+str(fmodel[-1].norons[noron].value))
 
         main_window["-LISTBOX-"].update(values=printVal)        
         sse = md.sum_square_error(fmodel,outputTarget)        
@@ -493,8 +493,8 @@ while 1:
                 fileInput, outputTarget =  file_row_select(tempdatas,rowsNumber,inputColumns,outputColumnsNumber)    # ilk sutun               
                 for i in range(len(fmodel[0].norons)):
                     fmodel[0].norons[i].value = fileInput[i]    # input
-                for j in range(len(fmodel[len(fmodel)-1].norons)):
-                    fmodel[len(fmodel)-1].norons[j].value = outputTarget[j]  # output
+                for j in range(len(fmodel[-1].norons)):
+                    fmodel[-1].norons[j].value = outputTarget[j]  # output
 
                 for i in range (int(epoc)):        
                     bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activationFunction)  
@@ -510,8 +510,8 @@ while 1:
         for layer in range(1,len(fmodel)):
             for noron in range(len(fmodel[layer].norons)):
                 printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(fmodel[layer].norons[noron].value))
-        for noron in range(len(fmodel[len(fmodel)-1].norons)):
-            printVal.append("o"+str(noron+1)+"= "+str(fmodel[len(fmodel)-1].norons[noron].value))
+        for noron in range(len(fmodel[-1].norons)):
+            printVal.append("o"+str(noron+1)+"= "+str(fmodel[-1].norons[noron].value))
         main_window["-LISTBOX-"].update(values=printVal)        
         sse = md.sum_square_error(fmodel,outputTarget)        
         main_window["-SSE-"].update(value=sse)

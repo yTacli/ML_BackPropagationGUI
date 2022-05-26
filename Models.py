@@ -1,13 +1,12 @@
 # Yücel TACLI
 
-from math import sqrt
 from random import random
 import numpy as np
 from Layer import Layer
 from Noron import Noron
 
 # hiddenNumber = []
-def create_model_base(inputNumber,inputValue,hiddenLayerNumber,hiddenNumber,outputNumber,activatitionFunction='Sigmoid',threshold=0.0):
+def create_model_base(inputNumber,inputValue,hiddenLayerNumber,hiddenNumber,outputNumber,activatitionFunction='Sigmoid',threshold=0.0):   
     model = []
     # input
     inputLayer = Layer()
@@ -97,13 +96,13 @@ def derivatives(activationFunction, x):
 
 def error_coefficient_out(activationFunction,outputTarget,outputPredic):
     derivative = derivatives(activationFunction,outputPredic)   
-    return (outputTarget-outputPredic) * derivative
+    return (outputPredic-outputTarget) * derivative
 
 # Hata Katsayısı 
 def error_coefficient(models,weights,outputTarget,activationFunction):
     # Out     
-    for i in range(len(models[len(models)-1].norons)):
-        models[len(models)-1].norons[i].errorCoefficient = error_coefficient_out(activationFunction,outputTarget[i],models[len(models)-1].norons[i].value)    
+    for i in range(len(models[-1].norons)):
+        models[-1].norons[i].errorCoefficient = error_coefficient_out(activationFunction,outputTarget[i],models[-1].norons[i].value)    
     # Hidden
     for i in range(len(models)-2, 0, -1): # ilk katmana gerek yok
         for j in range(len(models[i].norons)):
@@ -122,8 +121,8 @@ def update_weight_bias(models,weights,bias,learningRate):
         noronNumber = []
         for j in range(len(models[i].norons)):
             nextNoron = []            
-            for k in range(len(models[i+1].norons)):
-                newWeight = weights[i][j][k] + learningRate * models[i+1].norons[k].errorCoefficient * models[i].norons[j].value               
+            for k in range(len(models[i+1].norons)):                                
+                newWeight = weights[i][j][k] + learningRate * models[i+1].norons[k].errorCoefficient * models[i].norons[j].value
                 nextNoron.append(newWeight)                
             noronNumber.append(nextNoron)
         updateWeights.append(noronNumber)
@@ -145,8 +144,8 @@ def backward(models,weights,bias,outputTarget,learningRate,activatitionFunction)
 # SSE 
 def sum_square_error(models,outputTarget):
     outputPredic=[]
-    for i in range(len(models[len(models)-1].norons)):
-        outputPredic.append(models[len(models)-1].norons[i].value)
+    for i in range(len(models[-1].norons)):
+        outputPredic.append(models[-1].norons[i].value)
     error=0
     for i in range(len(outputTarget)):
         error += np.square(outputTarget[i]-outputPredic[i])     
@@ -154,8 +153,8 @@ def sum_square_error(models,outputTarget):
 # MSE 
 def mean_square_error(models,outputTarget):
     outputPredic=[]
-    for i in range(len(models[len(models)-1].norons)):
-        outputPredic.append(models[len(models)-1].norons[i].value)
+    for i in range(len(models[-1].norons)):
+        outputPredic.append(models[-1].norons[i].value)
     error=0
     for i in range(len(outputTarget)):
         error += np.square(outputTarget[i]-outputPredic[i])     
@@ -163,8 +162,8 @@ def mean_square_error(models,outputTarget):
 # RMSE
 def root_mean_square_error(models,outputTarget):
     outputPredic=[]
-    for i in range(len(models[len(models)-1].norons)):
-        outputPredic.append(models[len(models)-1].norons[i].value)
+    for i in range(len(models[-1].norons)):
+        outputPredic.append(models[-1].norons[i].value)
     error=0
     for i in range(len(outputTarget)):
         error += np.square(outputTarget[i]-outputPredic[i])

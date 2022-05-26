@@ -22,7 +22,7 @@ def threshold(x,t):
     if x >= t:
         return 1
     else:        
-        return 0
+        return 0        
         
 # Sigmoid Aktivasyon
 def sigmoid(x):
