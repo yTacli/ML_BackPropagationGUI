@@ -13,7 +13,9 @@ class Noron():
         elif self.activationFunction == 'ReLU':
             self.output = sigmoid(self.value)
         elif self.activationFunction == 'Threshold':
-            self.output = threshold(self.value,self.threshold)                    
+            self.output = threshold(self.value,self.threshold)    
+        elif self.activationFunction == 'Hypertanh':
+            self.output = tanh(self.value)    
 
 # Threshold (unit-step)
 # Türevlenebilir olmadığı için error-coefficiation hatalı olacaktır.
@@ -22,8 +24,9 @@ def threshold(x,t):
     if x >= t:
         return 1
     else:        
-        return 0
-        
+        return 0        
+
+    
 # Sigmoid Aktivasyon
 def sigmoid(x):
     return 1/(1+np.exp(-x))
@@ -37,4 +40,9 @@ def relu(x):
 # Türevi Error-coefficiation'ı etkilediği için kullanılmadı
 def tanh(x):
     # (e^x-e^-x)/(e^x+e^-x)
-    return np.tanh(x)
+    if x < -20.0:
+      return -1.0
+    elif x > 20.0:
+      return 1.0
+    else:
+     return np.tanh(x)    

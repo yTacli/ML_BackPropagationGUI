@@ -1,5 +1,5 @@
 # Yücel TACLI
-
+import random
 from pathlib import Path
 import PySimpleGUI as sg
 import numpy as np
@@ -8,7 +8,10 @@ import Models as md
 
 tableValues = []   # tablo values
 columnsName = [] # table values
-epoc = "0"
+seed = 3
+momentum= 0.75
+epoc = 0
+progresMaxVal = 100
 
 VIEWWEIGHT:int = 500
 VIEWHEIGHT:int = 300
@@ -88,7 +91,11 @@ def create_main_window():
             sg.Push(),
             sg.Button("RESET", key="-RESET-")
         ],
-        [sg.StatusBar("Yücel TACLI - https://github.com/yTacli/ML_BackPropagationGUI.git")]
+        [
+            sg.StatusBar("Yücel TACLI - https://github.com/yTacli/ML_BackPropagationGUI.git"),
+            sg.Push(),
+            sg.ProgressBar(max_value=progresMaxVal, orientation='h', size=(50, 20), key="-PROGRESS-")
+        ]
     ]
     window = sg.Window("Back Propataion GUI", layout=main_layout, finalize=True)
     window.set_min_size(window.size)
@@ -253,7 +260,10 @@ def file_row_select(dataFrame,rowsNumber,inputColumns,ouputColumn):
     selectRow = list(dataFrame.loc[rowsNumber])
     selectRowInput = [] 
     for col in inputColumns:
-        selectRowInput.append(float(selectRow[col])) # verilerde string varsa float()
+        if selectRow[col] != "?":
+            selectRowInput.append(float(selectRow[col])) # verilerde string varsa float()
+        else:
+            selectRowInput.append(float(0.0))
 
     # 2 output için
     if selectRow[ouputColumn] == 0:
@@ -288,7 +298,7 @@ def create_detay_window(dataFrame):
         select_layout = [
             [
                 sg.Text(f"{column} : "),
-                sg.Combo(["ID","INPUT","OUTPUT"],"ID",auto_size_text=True,key=f"-{column}-")
+                sg.Combo(["ID","INPUT","OUTPUT"],"INPUT",auto_size_text=True,key=f"-{column}-")
             ] for column in columnsName
         ]               
         main_layout= [
@@ -410,7 +420,10 @@ while 1:
                     if tempdatas.iloc[j][fileInputNumber+1] == list(outstr)[i]:
                         tempdatas.at[j,sonsutun] = i
 
-            fileInput, outputTarget =  file_row_select(tempdatas,0,inputColumns,outputColumnsNumber)     # ilk sutun
+            
+            rndRow = random.randint(1,rowsNumber)
+
+            fileInput, outputTarget =  file_row_select(tempdatas,rndRow,inputColumns,outputColumnsNumber)     # ilk sutun
         
         main_window["-CREATEMODELVIEW-"].update(disabled = True) 
         main_window["-INITIALIZE-"].update(disabled = False)       
@@ -419,9 +432,9 @@ while 1:
         learningRate = float(main_window['-LEARNRATE-'].get())     
 
         if selectedTab == "Veri Giriş":
-            model,weights,bias = md.create_model_base(secInputNumber,inputValues,secHiddenLayerNumber,secHiddenList,secOutputNumber,activationFunction,threshold)            
+            model,weights,bias,prewWeightsDelta,prewBiasDelta = md.create_model_base(secInputNumber,inputValues,secHiddenLayerNumber,secHiddenList,secOutputNumber,seed,activationFunction,threshold)            
         else:
-            model,weights,bias = md.create_model_base(fileInputNumber,fileInput,fileHiddenLayerNumber,fileHiddenList,fileOutputNumber,activationFunction,threshold)        
+            model,weights,bias,prewWeightsDelta,prewBiasDelta = md.create_model_base(fileInputNumber,fileInput,fileHiddenLayerNumber,fileHiddenList,fileOutputNumber,seed,activationFunction,threshold)        
 
         printVal = ["WEIGHT"]        
         for layer in range(len(weights)):
@@ -438,28 +451,29 @@ while 1:
         main_window["-NEXT-"].update(disabled = False) 
         main_window["-PLAY-"].update(disabled = False)
     elif event == "-NEXT-":
-        fmodel= md.forward(model,weights,bias)         
+        model = md.forward(model,weights,bias)    
+
         printVal = []        
-        for i in range(len(fmodel[0].norons)):
-            printVal.append("i"+str(i+1)+"= "+str(fmodel[0].norons[i].value))
-        for layer in range(1,len(fmodel)):
-            for noron in range(len(fmodel[layer].norons)):
-                printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(fmodel[layer].norons[noron].value))
-        for noron in range(len(fmodel[-1].norons)):
-            printVal.append("o"+str(noron+1)+"= "+str(fmodel[-1].norons[noron].value))
+        for i in range(len(model[0].norons)):
+            printVal.append("i"+str(i+1)+"= "+str(model[0].norons[i].value))
+        for layer in range(1,len(model)-1):
+            for noron in range(len(model[layer].norons)):
+                printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(model[layer].norons[noron].value))
+        for noron in range(len(model[-1].norons)):
+            printVal.append("o"+str(noron+1)+"= "+str(model[-1].norons[noron].value))
 
         main_window["-LISTBOX-"].update(values=printVal)        
-        sse = md.sum_square_error(fmodel,outputTarget)        
+        sse = md.sum_square_error(model,outputTarget)        
         main_window["-SSE-"].update(value=sse)
-        mse = md.mean_square_error(fmodel,outputTarget)
+        mse = md.mean_square_error(model,outputTarget)
         main_window["-MSE-"].update(value=mse)
-        rmse = md.root_mean_square_error(fmodel,outputTarget)
+        rmse = md.root_mean_square_error(model,outputTarget)
         main_window["-RMSE-"].update(value=rmse)
         
         main_window["-NEXT-"].update(disabled = True)              
         main_window["-BACK-"].update(disabled = False)        
     elif event == "-BACK-":    
-        bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activationFunction)
+        model,upW,upB,prewWDelta,prewBDelta = md.backward(model,weights,bias,outputTarget,learningRate,momentum,prewWeightsDelta,prewBiasDelta)
         printVal = []
         for layer in range(len(weights)):
             for noron in range(len(weights[layer])):
@@ -467,11 +481,14 @@ while 1:
                     printVal.append("old_w"+str(layer+1)+"_"+str(noron+1)+"-"+str(nextNoron+1)+"= "+str(weights[layer][noron][nextNoron]))
                     printVal.append("new_w"+str(layer+1)+"_"+str(noron+1)+"-"+str(nextNoron+1)+"= "+str(upW[layer][noron][nextNoron]))
         printVal.append("BIAS")        
-        for b in range(len(bias)):
-            for nextNoron in range(len(bias[b])):
-                printVal.append("old_w"+str(b+1)+"-"+str(nextNoron+1)+"= "+str(bias[b][nextNoron]))
-                printVal.append("new_w"+str(b+1)+"-"+str(nextNoron+1)+"= "+str(upB[b][nextNoron]))
-        model = bmodel
+        for i in range(len(bias)): 
+            for j in range(len(bias[i])):
+                printVal.append("old_b"+str(i+1)+"-"+str(j+1)+"= "+str(bias[i][j]))
+                printVal.append("new_b"+str(i+1)+"-"+str(j+1)+"= "+str(upB[i][j]))
+
+        prewWeightsDelta = prewWDelta   
+        prewBiasDelta = prewBDelta 
+        model = model
         weights = upW
         bias = upB
 
@@ -479,45 +496,64 @@ while 1:
         main_window["-NEXT-"].update(disabled = False)              
         main_window["-BACK-"].update(disabled = True) 
         main_window["-PLAY-"].update(disabled = False) 
-    elif event == "-PLAY-":         
-        while epoc == '0' or epoc == "":
-            epoc = sg.popup_get_text('epoc', "EPOC SAYISI",'0')        
-            if epoc == '0' or epoc == "":
-                sg.popup("Epoc 0 veya boş olamaz!!!")       
-        # İlklendirildiği için aynı sonucu verecektir. 
-        # Döngü Backward ile başlayacağı için ilk değer olmazsa hata verecektir.
-        fmodel= md.forward(model,weights,bias)
-            
-        if selectedTab == "Dosya Seçim":
-            for i in range(rowsNumber):
-                fileInput, outputTarget =  file_row_select(tempdatas,rowsNumber,inputColumns,outputColumnsNumber)    # ilk sutun               
-                for i in range(len(fmodel[0].norons)):
-                    fmodel[0].norons[i].value = fileInput[i]    # input
-                for j in range(len(fmodel[-1].norons)):
-                    fmodel[-1].norons[j].value = outputTarget[j]  # output
+    elif event == "-PLAY-":    
+        bar = main_window["-PROGRESS-"]
+        bar.update_bar(0)
+        maxEpoc = sg.popup_get_text('epoc', "EPOC SAYISI",'1')
+        barUP = float(progresMaxVal) / float(maxEpoc)
+        progress = 0
+        rnd = random.Random(seed)       
+        if selectedTab == "Dosya Seçim":  
+            rowIndexs = np.arange(rowsNumber)
+            epoc = 0
+            # İlklendirildiği için aynı sonucu verecektir. 
+            # Döngü Backward ile başlayacağı için ilk değer olmazsa hata verecektir.        
+            while epoc < int(maxEpoc):                                         
+                rnd.shuffle(rowIndexs)
+                for ri in range(rowsNumber):
+                    fileInput, outputTarget =  file_row_select(tempdatas,ri,inputColumns,outputColumnsNumber)    
+                    for i in range(len(model[0].norons)):
+                        model[0].norons[i].value = fileInput[i]    # input
+                    for j in range(len(model[-1].norons)):
+                        model[-1].norons[j].value = outputTarget[j]  # output
 
-                for i in range (int(epoc)):        
-                    bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activationFunction)  
-                    fmodel= md.forward(bmodel,upW,upB)                    
-        else:                                    
-            for i in range (int(epoc)):        
-                bmodel,upW,upB =md.backward(fmodel,weights,bias,outputTarget,learningRate,activationFunction)  
-                fmodel= md.forward(bmodel,upW,upB)  
-                
-        printVal = []        
-        for i in range(len(fmodel[0].norons)):
-            printVal.append("i"+str(i+1)+"= "+str(fmodel[0].norons[i].value))
-        for layer in range(1,len(fmodel)):
-            for noron in range(len(fmodel[layer].norons)):
-                printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(fmodel[layer].norons[noron].value))
-        for noron in range(len(fmodel[-1].norons)):
-            printVal.append("o"+str(noron+1)+"= "+str(fmodel[-1].norons[noron].value))
+                    model= md.forward(model,weights,bias)
+                    model,upW,upB,prewWDelta,prewBDelta = md.backward(model,weights,bias,outputTarget,learningRate,momentum,prewWeightsDelta,prewBiasDelta) 
+                    weights = upW
+                    bias = upB
+                epoc += 1  
+                progress += barUP
+                bar.update_bar(progress) 
+                if progress >= progresMaxVal:
+                        sg.popup("Eğitim Sona Erdi...")
+        else:
+             while epoc < int(maxEpoc): 
+                model= md.forward(model,weights,bias)                                   
+                model,upW,upB,prewWDelta,prewBDelta = md.backward(model,weights,bias,outputTarget,learningRate,momentum,prewWeightsDelta,prewBiasDelta)
+                weights = upW
+                bias = upB 
+                epoc += 1  
+                progress += barUP
+                bar.update_bar(progress) 
+                if progress >= progresMaxVal:
+                        sg.popup("Eğitim Sona Erdi...")
+        printVal = []   
+        model= md.forward(model,upW,upB)
+
+        for i in range(len(model[0].norons)):
+            printVal.append("i"+str(i+1)+"= "+str(model[0].norons[i].value))
+        for layer in range(1,len(model)-1):
+            for noron in range(len(model[layer].norons)):
+                printVal.append("h"+str(layer)+"-"+str(noron+1)+"= "+str(model[layer].norons[noron].value))
+        for noron in range(len(model[-1].norons)):
+            printVal.append("o"+str(noron+1)+"= "+str(model[-1].norons[noron].value))
+
         main_window["-LISTBOX-"].update(values=printVal)        
-        sse = md.sum_square_error(fmodel,outputTarget)        
+        sse = md.sum_square_error(model,outputTarget)        
         main_window["-SSE-"].update(value=sse)
-        mse = md.mean_square_error(fmodel,outputTarget)
+        mse = md.mean_square_error(model,outputTarget)
         main_window["-MSE-"].update(value=mse)
-        rmse = md.root_mean_square_error(fmodel,outputTarget)
+        rmse = md.root_mean_square_error(model,outputTarget)
         main_window["-RMSE-"].update(value=rmse)                        
                 
         main_window["-NEXT-"].update(disabled = True)              
